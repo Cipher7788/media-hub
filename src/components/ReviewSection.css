@@ -1,0 +1,35 @@
+.review-card {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  align-items: center;
+}
+
+.review-card .avatar {
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  margin-right: 10px;
+}
+
+.review-card .content {
+  flex: 1;
+}
+
+.review-card .rating {
+  font-size: 14px;
+  color: #FFD700; /* Gold color for stars */
+}
+
+.review-card .timestamp {
+  font-size: 12px;
+  color: #888;
+}
+
+.review-card .comment {
+  margin-top: 5px;
+  font-size: 14px;
+}
