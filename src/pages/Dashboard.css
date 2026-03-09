@@ -1,0 +1,29 @@
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.chart {
+    width: 100%;
+    height: 300px;
+    margin: 20px 0;
+}
+
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .stat-cards, .collection-grid {
+        grid-template-columns: 1fr;
+    }
+}
