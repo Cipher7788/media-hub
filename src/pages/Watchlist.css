@@ -1,0 +1,51 @@
+/** Watchlist Page Styles */
+
+.watchlist {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.status-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.status-tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.status-tab:hover {
+    background-color: #f0f0f0;
+}
+
+.progress-bar {
+    position: relative;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #4caf50;
+    border-radius: 10px;
+    transition: width 0.4s;
+}
+
+.item-card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #fff;
+    transition: box-shadow 0.3s;
+}
+
+.item-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
