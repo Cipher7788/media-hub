@@ -1,1 +1,0 @@
-<code for firebase config>
