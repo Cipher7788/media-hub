@@ -1,1 +1,56 @@
-<code for .gitignore>
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+build/
+dist/
+target/
+bin/
+proxy/proxy
+exit-node/exit-node
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Go
+*.test
+*.prof
+
+# Rust
+# Do not ignore Cargo.lock for binary crates (exit-node should commit it)
+
+# Docker
+.docker/
+
+# Certificates (never commit real certs)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Coverage reports
+coverage/
+*.out
+lcov.info

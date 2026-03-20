@@ -1,0 +1,19 @@
+[package]
+name = "exit-node"
+version = "0.1.0"
+edition = "2021"
+description = "Privacy proxy exit node – TCP relay with connection limiting"
+license = "MIT"
+
+[[bin]]
+name = "exit-node"
+path = "src/main.rs"
+
+[dependencies]
+# No external dependencies – we rely solely on the standard library so that
+# the binary stays small and auditable.
+
+[profile.release]
+opt-level = 3
+strip = true
+lto = true

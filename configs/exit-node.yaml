@@ -1,0 +1,15 @@
+# exit-node.yaml – Exit Node Configuration
+
+exit_node:
+  # TCP address the exit node listens on.
+  listen_addr: "0.0.0.0:4001"
+  # Maximum simultaneous connections from a single source IP.
+  max_connections_per_ip: 50
+  # Permitted target ports. An empty list means no port restriction.
+  allowed_target_ports:
+    - 80
+    - 443
+  # Connection timeout when dialling a target.
+  connect_timeout: "10s"
+  # Idle timeout; closes relay if no data is transferred for this duration.
+  idle_timeout: "5m"
