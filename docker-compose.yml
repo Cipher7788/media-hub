@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  proxy:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.proxy
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    volumes:
+      - ./configs/proxy.yaml:/etc/proxy/proxy.yaml:ro
+    restart: unless-stopped
+    networks:
+      - proxy-net
+    depends_on:
+      - exit-node
+
+  exit-node:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.exit-node
+    ports:
+      - "4001:4001"
+    volumes:
+      - ./configs/exit-node.yaml:/etc/exit-node/exit-node.yaml:ro
+    restart: unless-stopped
+    networks:
+      - proxy-net
+
+  # Optional: Prometheus for metrics scraping.
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./configs/monitoring.yaml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
+    networks:
+      - proxy-net
+
+networks:
+  proxy-net:
+    driver: bridge

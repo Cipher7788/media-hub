@@ -1,0 +1,33 @@
+# Multi-stage build for the Rust exit node.
+# Stage 1 – build
+FROM rust:1.77-slim AS builder
+
+WORKDIR /build
+
+COPY exit-node/Cargo.toml ./
+# Cache dependency compilation before copying source.
+RUN mkdir src && echo "fn main() {}" > src/main.rs && \
+    cargo build --release && \
+    rm -rf src
+
+COPY exit-node/src ./src
+# Touch main.rs to force re-compilation of the real source.
+RUN touch src/main.rs && cargo build --release
+
+# Stage 2 – minimal runtime image
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /build/target/release/exit-node /usr/local/bin/exit-node
+COPY configs/exit-node.yaml /etc/exit-node/exit-node.yaml
+
+# Create a non-root user.
+RUN useradd -r -u 65534 -g nogroup exitnode
+USER exitnode
+
+EXPOSE 4001
+
+ENTRYPOINT ["exit-node"]

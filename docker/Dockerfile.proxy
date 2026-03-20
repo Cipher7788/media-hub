@@ -1,0 +1,29 @@
+# Multi-stage build for the Go proxy engine.
+# Stage 1 – build
+FROM golang:1.22-alpine AS builder
+
+WORKDIR /build
+
+COPY proxy/go.mod proxy/go.sum ./
+RUN go mod download
+
+COPY proxy/ ./
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-s -w" \
+    -o /bin/proxy \
+    ./cmd/proxy
+
+# Stage 2 – minimal runtime image
+FROM scratch
+
+# Copy the binary and default config.
+COPY --from=builder /bin/proxy /proxy
+COPY configs/proxy.yaml /etc/proxy/proxy.yaml
+
+# Non-root user via numeric UID (no /etc/passwd in scratch).
+USER 65534:65534
+
+EXPOSE 8080 9090
+
+ENTRYPOINT ["/proxy"]
+CMD ["-addr", ":8080", "-metrics", ":9090", "-config", "/etc/proxy/proxy.yaml"]
