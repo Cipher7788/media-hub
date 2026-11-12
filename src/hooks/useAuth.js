@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? <p role="status">Loading session…</p> : children}
     </AuthContext.Provider>
   );
 }
@@ -29,3 +29,4 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
+

@@ -16,11 +16,11 @@ import { db } from '../config/firebase';
 export async function getFavorites(userId) {
   const q = query(collection(db, 'favorites'), where('userId', '==', userId));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 }
 
 export async function addFavorite(userId, item) {
-  return addDoc(collection(db, 'favorites'), { userId, ...item });
+  return addDoc(collection(db, 'favorites'), { ...item, userId });
 }
 
 export async function removeFavorite(favoriteId) {
@@ -32,11 +32,11 @@ export async function removeFavorite(favoriteId) {
 export async function getWatchlist(userId) {
   const q = query(collection(db, 'watchlist'), where('userId', '==', userId));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 }
 
 export async function addToWatchlist(userId, item) {
-  return addDoc(collection(db, 'watchlist'), { userId, ...item });
+  return addDoc(collection(db, 'watchlist'), { ...item, userId });
 }
 
 export async function removeFromWatchlist(watchlistId) {
@@ -48,11 +48,11 @@ export async function removeFromWatchlist(watchlistId) {
 export async function getReviews(mediaId) {
   const q = query(collection(db, 'reviews'), where('mediaId', '==', mediaId));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snapshot.docs.map((d) => ({ ...d.data(), id: d.id }));
 }
 
 export async function addReview(userId, mediaId, reviewData) {
-  return addDoc(collection(db, 'reviews'), { userId, mediaId, ...reviewData });
+  return addDoc(collection(db, 'reviews'), { ...reviewData, userId, mediaId });
 }
 
 export async function updateReview(reviewId, reviewData) {
@@ -62,3 +62,4 @@ export async function updateReview(reviewId, reviewData) {
 export async function deleteReview(reviewId) {
   return deleteDoc(doc(db, 'reviews', reviewId));
 }
+

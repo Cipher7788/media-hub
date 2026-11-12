@@ -1,6 +1,6 @@
 // src/pages/Search.jsx
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { searchMovies, searchAnime, searchComics, searchBooks } from '../services/api';
 import './Search.css';
 
@@ -10,6 +10,13 @@ const CATEGORIES = [
   { value: 'comics', label: 'Comics' },
   { value: 'books', label: 'Books' },
 ];
+
+const searchByCategory = new Map([
+  ['movies', searchMovies],
+  ['anime', searchAnime],
+  ['comics', searchComics],
+  ['books', searchBooks],
+]);
 
 function normalizeResult(item, category) {
   if (category === 'movies') {
@@ -53,47 +60,50 @@ function normalizeResult(item, category) {
 
 export function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [category, setCategory] = useState(
-    searchParams.get('category') || 'movies'
-  );
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { key: locationKey } = useLocation();
+  const submittedQuery = (searchParams.get('q') || '').trim();
+  const urlCategory = searchParams.get('category');
+  const submittedCategory = searchByCategory.has(urlCategory) ? urlCategory : 'movies';
+  const [query, setQuery] = useState(submittedQuery);
+  const [category, setCategory] = useState(submittedCategory);
+  const [outcome, setOutcome] = useState(null);
 
   useEffect(() => {
-    const q = searchParams.get('q');
-    const cat = searchParams.get('category') || 'movies';
-    if (q) {
-      setQuery(q);
-      setCategory(cat);
-      runSearch(q, cat);
-    }
-  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+    setQuery(submittedQuery);
+    setCategory(submittedCategory);
 
-  async function runSearch(q, cat) {
-    if (!q.trim()) return;
-    setLoading(true);
-    setError(null);
-    try {
-      let raw = [];
-      if (cat === 'movies') raw = await searchMovies(q);
-      else if (cat === 'anime') raw = await searchAnime(q);
-      else if (cat === 'comics') raw = await searchComics(q);
-      else if (cat === 'books') raw = await searchBooks(q);
-      setResults(raw.map((item) => normalizeResult(item, cat)));
-    } catch (err) {
-      setError(err.message);
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }
+    if (!submittedQuery) return;
+    const controller = new AbortController();
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    setSearchParams({ q: query, category });
-    runSearch(query, category);
+    async function runSearch() {
+      try {
+        const search = searchByCategory.get(submittedCategory);
+        const raw = await search(submittedQuery, { signal: controller.signal });
+        if (!controller.signal.aborted) {
+          const results = raw.map((item) => normalizeResult(item, submittedCategory));
+          setOutcome({ locationKey, results });
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setOutcome({ locationKey, error: error.message, results: [] });
+        }
+      }
+    }
+
+    runSearch();
+    return () => controller.abort();
+  }, [locationKey, submittedQuery, submittedCategory]);
+
+  const currentOutcome = outcome?.locationKey === locationKey ? outcome : null;
+  const loading = Boolean(submittedQuery && !currentOutcome);
+  const results = currentOutcome?.results || [];
+  const error = currentOutcome?.error;
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    const trimmedQuery = query.trim();
+    setOutcome(null);
+    setSearchParams(trimmedQuery ? { q: trimmedQuery, category } : { category });
   }
 
   return (
@@ -103,6 +113,7 @@ export function Search() {
         <form className="search-form" onSubmit={handleSubmit}>
           <select
             className="search-input"
+            aria-label="Media category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             style={{ flex: '0 0 auto', width: '130px' }}
@@ -117,6 +128,7 @@ export function Search() {
             className="search-input"
             type="text"
             placeholder="Search..."
+            aria-label="Search titles"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -125,8 +137,8 @@ export function Search() {
           </button>
         </form>
 
-        {loading && <p className="loading">Loading...</p>}
-        {error && <p className="loading" style={{ color: '#e53e3e' }}>{error}</p>}
+        {loading && <p className="loading" role="status">Loading...</p>}
+        {error && <p className="loading" role="alert" style={{ color: '#e53e3e' }}>{error}</p>}
 
         {!loading && !error && results.length > 0 && (
           <div className="results-grid">
@@ -155,10 +167,11 @@ export function Search() {
           </div>
         )}
 
-        {!loading && !error && results.length === 0 && query && (
+        {!loading && !error && results.length === 0 && submittedQuery && (
           <p className="loading">No results found.</p>
         )}
       </div>
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
 // src/components/Navigation.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { logout } from '../services/auth';
@@ -7,12 +7,18 @@ import './Navigation.css';
 
 export function Navigation() {
   const { currentUser } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState(false);
 
   const handleLogout = async () => {
+    setLoggingOut(true);
+    setLogoutError(false);
     try {
       await logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch {
+      setLogoutError(true);
+    } finally {
+      setLoggingOut(false);
     }
   };
 
@@ -29,7 +35,7 @@ export function Navigation() {
           Search
         </NavLink>
         {currentUser ? (
-          <button className="nav-button" onClick={handleLogout}>
+          <button className="nav-button" disabled={loggingOut} onClick={handleLogout}>
             Logout
           </button>
         ) : (
@@ -37,7 +43,9 @@ export function Navigation() {
             Login
           </NavLink>
         )}
+        {currentUser && logoutError && <span role="alert">Could not sign out. Try again.</span>}
       </div>
     </nav>
   );
 }
+
