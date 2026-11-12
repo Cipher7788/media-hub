@@ -1,58 +1,38 @@
-// src/services/auth.js
-
-import { GoogleAuthProvider, GithubAuthProvider, signInWithPopup, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+} from 'firebase/auth';
 import { auth } from '../config/firebase';
 
-// Google Login Function
-export const googleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider);
-        // User info can be retrieved here
-        return result.user;
-    } catch (error) {
-        console.error('Error during Google login:', error);
-    }
-};
+export async function googleLogin() {
+  const { user } = await signInWithPopup(auth, new GoogleAuthProvider());
+  return user;
+}
 
-// GitHub Login Function
-export const githubLogin = async () => {
-    const provider = new GithubAuthProvider();
-    try {
-        const result = await signInWithPopup(auth, provider);
-        // User info can be retrieved here
-        return result.user;
-    } catch (error) {
-        console.error('Error during GitHub login:', error);
-    }
-};
+export async function githubLogin() {
+  const { user } = await signInWithPopup(auth, new GithubAuthProvider());
+  return user;
+}
 
-// Email/Password Login Function
-export const emailPasswordLogin = async (email, password) => {
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        // User info can be retrieved here
-        return userCredential.user;
-    } catch (error) {
-        console.error('Error during email/password login:', error);
-    }
-};
+export async function emailPasswordLogin(email, password) {
+  const { user } = await signInWithEmailAndPassword(auth, email, password);
+  return user;
+}
 
-// Logout Function
-export const logout = async () => {
-    try {
-        await signOut(auth);
-        console.log('User signed out successfully');
-    } catch (error) {
-        console.error('Error signing out:', error);
-    }
-};
+export async function register(email, password) {
+  const { user } = await createUserWithEmailAndPassword(auth, email, password);
+  return user;
+}
 
-// Session Management (Check if user is logged in)
-export const checkSession = () => {
-    return new Promise((resolve) => {
-        auth.onAuthStateChanged((user) => {
-            resolve(user);
-        });
-    });
-};
+export function logout() {
+  return signOut(auth);
+}
+
+export async function checkSession() {
+  await auth.authStateReady();
+  return auth.currentUser;
+}

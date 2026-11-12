@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(data) {
+      return request.auth != null && request.auth.uid == data.userId;
+    }
+
+    // Preserve access to user-scoped data covered by the previously documented rules.
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /favorites/{id} {
+      allow read, delete: if owns(resource.data);
+      allow create: if owns(request.resource.data);
+    }
+
+    match /watchlist/{id} {
+      allow read, delete: if owns(resource.data);
+      allow create: if owns(request.resource.data);
+    }
+
+    match /reviews/{id} {
+      allow read: if request.auth != null;
+      allow create: if owns(request.resource.data);
+      allow update: if owns(resource.data) && owns(request.resource.data)
+        && request.resource.data.mediaId == resource.data.mediaId;
+      allow delete: if owns(resource.data);
+    }
+  }
+}

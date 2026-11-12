@@ -122,26 +122,19 @@ media-hub/
 
 1. Create a Firebase project at [firebase.google.com](https://firebase.google.com)
 2. Enable:
-   - Authentication (Email/Password)
+   - Authentication (Email/Password, plus Google and GitHub if you want to offer social sign-in)
+   - Authorized domains for your development and hosting origins under Authentication settings
    - Firestore Database
 3. Copy credentials to `.env.local`
 
 ### Firestore Rules
 
-Add these security rules in Firebase Console:
+The checked-in `firestore.rules` file protects the existing top-level collections. Favorites and watchlist items are private to their owners. Signed-in users can read reviews, and only the review author can update or delete them.
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth.uid == userId;
-      match /{document=**} {
-        allow read, write: if request.auth.uid == userId;
-      }
-    }
-  }
-}
+Deploy the rules to the Firebase project configured in `.env.local`:
+
+```bash
+firebase deploy --only firestore:rules --project YOUR_PROJECT_ID
 ```
 
 ## 📦 Building for Production
@@ -156,7 +149,8 @@ npm run build
 ```bash
 npm install -g firebase-tools
 firebase login
-firebase deploy
+npm run build
+firebase deploy --only hosting,firestore:rules --project YOUR_PROJECT_ID
 ```
 
 ### GitHub Pages
