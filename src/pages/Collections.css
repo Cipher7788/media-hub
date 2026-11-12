@@ -1,0 +1,73 @@
+.collections {
+  max-width: 760px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.collections section {
+  margin-top: 1.5rem;
+}
+
+.collections ul {
+  list-style: none;
+  padding: 0;
+}
+
+.collection-entry {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+
+.collection-entry span {
+  flex: 1;
+}
+
+.collection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.75rem;
+}
+
+.collection-entry button,
+.collection-actions button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.4rem;
+  background: white;
+  color: #3f3580;
+  cursor: pointer;
+}
+
+.collection-actions button[aria-pressed='true'] {
+  background: #3f3580;
+  color: white;
+}
+
+.collection-entry button:disabled,
+.collection-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.review-panel {
+  width: 100%;
+}
+
+.review-panel form,
+.review-panel label {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.review-panel form {
+  margin: 0.75rem 0;
+}
+
+.review-entry {
+  margin: 0.75rem 0;
+  overflow-wrap: anywhere;
+}

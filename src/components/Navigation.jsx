@@ -34,6 +34,7 @@ export function Navigation() {
         <NavLink to="/search" className="nav-link">
           Search
         </NavLink>
+        {currentUser && <NavLink to="/collections" className="nav-link">My collections</NavLink>}
         {currentUser ? (
           <button className="nav-button" disabled={loggingOut} onClick={handleLogout}>
             Logout

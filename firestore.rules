@@ -13,18 +13,29 @@ service cloud.firestore {
     match /favorites/{id} {
       allow read, delete: if owns(resource.data);
       allow create: if owns(request.resource.data);
+      allow update: if owns(resource.data) && owns(request.resource.data)
+        && request.resource.data.mediaId == resource.data.mediaId;
     }
 
     match /watchlist/{id} {
       allow read, delete: if owns(resource.data);
       allow create: if owns(request.resource.data);
+      allow update: if owns(resource.data) && owns(request.resource.data)
+        && request.resource.data.mediaId == resource.data.mediaId;
+    }
+
+    function validReview(data) {
+      return data.mediaId is string && data.rating is int
+        && data.rating >= 1 && data.rating <= 5
+        && data.text is string && data.text.size() <= 2000;
     }
 
     match /reviews/{id} {
       allow read: if request.auth != null;
-      allow create: if owns(request.resource.data);
+      allow create: if owns(request.resource.data) && validReview(request.resource.data);
       allow update: if owns(resource.data) && owns(request.resource.data)
-        && request.resource.data.mediaId == resource.data.mediaId;
+        && request.resource.data.mediaId == resource.data.mediaId
+        && validReview(request.resource.data);
       allow delete: if owns(resource.data);
     }
   }

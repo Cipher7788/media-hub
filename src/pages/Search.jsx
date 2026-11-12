@@ -1,7 +1,12 @@
 // src/pages/Search.jsx
 import React, { useState, useEffect } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
-import { searchMovies, searchAnime, searchComics, searchBooks } from '../services/api';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { discoverMovies, searchMovies, searchAnime, searchComics, searchBooks } from '../services/api';
+import { useAuth } from '../hooks/useAuth';
+import { useCollections } from '../hooks/useCollections';
+import { Reviews } from '../components/Reviews';
+import { CollectionActions } from '../components/CollectionActions';
+import { movieGenres } from '../movieGenres';
 import './Search.css';
 
 const CATEGORIES = [
@@ -58,12 +63,64 @@ function normalizeResult(item, category) {
   return { id: item.id, title: String(item), image: null, subtitle: '' };
 }
 
+function SavedResults({ userId, ...props }) {
+  const collections = useCollections(userId);
+  return <ResultGrid {...props} userId={userId} collections={collections} />;
+}
+
+function ResultGrid({ results, category, userId, collections }) {
+  const [openReviews, setOpenReviews] = useState(null);
+
+  return (
+    <>
+      {collections?.error && <p role="alert">{collections.error}</p>}
+      <div className="results-grid">
+        {results.map((item) => {
+          const mediaId = `${category}:${item.id}`;
+          return (
+            <div key={mediaId} className="result-card">
+              {item.image ? (
+                <img src={item.image} alt={item.title} loading="lazy" />
+              ) : (
+                <div className="result-placeholder" aria-hidden="true">🎬</div>
+              )}
+              <h3>{item.title}</h3>
+              {item.subtitle && <p>{item.subtitle}</p>}
+              {collections?.favorites && collections?.watchlist && (
+                <CollectionActions userId={userId} favorites={collections.favorites}
+                  watchlist={collections.watchlist} item={{
+                    mediaId,
+                    category,
+                    title: item.title || 'Untitled item',
+                    image: item.image,
+                  }} />
+              )}
+              {userId && (
+                <div className="collection-actions">
+                  <button type="button" aria-expanded={openReviews === mediaId}
+                    onClick={() => setOpenReviews(openReviews === mediaId ? null : mediaId)}>
+                    {openReviews === mediaId ? 'Hide reviews' : 'Show reviews'}
+                  </button>
+                  {openReviews === mediaId && <Reviews mediaId={mediaId} userId={userId} />}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
 export function Search() {
+  const { currentUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const { key: locationKey } = useLocation();
   const submittedQuery = (searchParams.get('q') || '').trim();
   const urlCategory = searchParams.get('category');
   const submittedCategory = searchByCategory.has(urlCategory) ? urlCategory : 'movies';
+  const genre = searchParams.get('genre');
+  const genreName = !submittedQuery && submittedCategory === 'movies' ? movieGenres.get(genre) : null;
   const [query, setQuery] = useState(submittedQuery);
   const [category, setCategory] = useState(submittedCategory);
   const [outcome, setOutcome] = useState(null);
@@ -72,15 +129,19 @@ export function Search() {
     setQuery(submittedQuery);
     setCategory(submittedCategory);
 
-    if (!submittedQuery) return;
+    if (!submittedQuery && !genreName) return;
     const controller = new AbortController();
 
     async function runSearch() {
       try {
         const search = searchByCategory.get(submittedCategory);
-        const raw = await search(submittedQuery, { signal: controller.signal });
+        const options = { signal: controller.signal };
+        const raw = genreName
+          ? await discoverMovies(genre, options)
+          : await search(submittedQuery, options);
         if (!controller.signal.aborted) {
-          const results = raw.map((item) => normalizeResult(item, submittedCategory));
+          const results = raw.map((item) => normalizeResult(item, submittedCategory))
+            .filter((item) => item.id != null);
           setOutcome({ locationKey, results });
         }
       } catch (error) {
@@ -92,10 +153,10 @@ export function Search() {
 
     runSearch();
     return () => controller.abort();
-  }, [locationKey, submittedQuery, submittedCategory]);
+  }, [locationKey, submittedQuery, submittedCategory, genre, genreName]);
 
   const currentOutcome = outcome?.locationKey === locationKey ? outcome : null;
-  const loading = Boolean(submittedQuery && !currentOutcome);
+  const loading = Boolean((submittedQuery || genreName) && !currentOutcome);
   const results = currentOutcome?.results || [];
   const error = currentOutcome?.error;
 
@@ -109,7 +170,7 @@ export function Search() {
   return (
     <div className="search">
       <div className="search-container">
-        <h1>Search</h1>
+        <h1>{genreName ? `${genreName} movies` : 'Search'}</h1>
         <form className="search-form" onSubmit={handleSubmit}>
           <select
             className="search-input"
@@ -141,33 +202,18 @@ export function Search() {
         {error && <p className="loading" role="alert" style={{ color: '#e53e3e' }}>{error}</p>}
 
         {!loading && !error && results.length > 0 && (
-          <div className="results-grid">
-            {results.map((item) => (
-              <div key={item.id} className="result-card">
-                {item.image ? (
-                  <img src={item.image} alt={item.title} />
-                ) : (
-                  <div
-                    style={{
-                      height: '300px',
-                      background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '3rem',
-                    }}
-                  >
-                    🎬
-                  </div>
-                )}
-                <h3>{item.title}</h3>
-                {item.subtitle && <p>{item.subtitle}</p>}
-              </div>
-            ))}
-          </div>
+          currentUser ? (
+            <SavedResults key={currentUser.uid} userId={currentUser.uid}
+              results={results} category={submittedCategory} />
+          ) : (
+            <>
+              <p><Link to="/login" state={{ returnTo: '/search', search: searchParams.toString() }}>Sign in</Link> to save items or write reviews.</p>
+              <ResultGrid results={results} category={submittedCategory} />
+            </>
+          )
         )}
 
-        {!loading && !error && results.length === 0 && submittedQuery && (
+        {!loading && !error && results.length === 0 && (submittedQuery || genreName) && (
           <p className="loading">No results found.</p>
         )}
       </div>

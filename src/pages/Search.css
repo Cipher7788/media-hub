@@ -108,3 +108,10 @@
     gap: 1rem;
   }
 }
+.result-placeholder {
+  height: 300px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-size: 3rem;
+}

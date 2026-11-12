@@ -1,1 +1,9 @@
-<code for .gitignore>
+node_modules/
+build/
+coverage/
+.firebase/
+firebase-debug*.log
+.env
+.env.*
+!.env.example
+npm-debug.log*

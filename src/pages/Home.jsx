@@ -1,6 +1,7 @@
 // src/pages/Home.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { movieGenres } from '../movieGenres';
 import './Home.css';
 
 const CATEGORIES = [
@@ -10,14 +11,7 @@ const CATEGORIES = [
   { label: 'Books', icon: '📚', query: 'books' },
 ];
 
-const FEATURED = [
-  { id: 1, title: 'Action', icon: '🎬' },
-  { id: 2, title: 'Adventure', icon: '🗺️' },
-  { id: 3, title: 'Drama', icon: '🎭' },
-  { id: 4, title: 'Sci-Fi', icon: '🚀' },
-  { id: 5, title: 'Fantasy', icon: '🧙' },
-  { id: 6, title: 'Horror', icon: '👻' },
-];
+const GENRE_ICONS = ['🎬', '🗺️', '🎭', '🚀', '🧙', '👻'];
 
 export function Home() {
   return (
@@ -47,14 +41,14 @@ export function Home() {
       <section className="featured">
         <h2>Explore by Genre</h2>
         <div className="featured-grid">
-          {FEATURED.map((item) => (
+          {[...movieGenres].map(([id, title], index) => (
             <Link
-              key={item.id}
-              to={`/search?q=${encodeURIComponent(item.title)}`}
+              key={id}
+              to={`/search?category=movies&genre=${id}`}
               className="featured-card"
             >
-              <div className="featured-card-placeholder">{item.icon}</div>
-              <h3>{item.title}</h3>
+              <div className="featured-card-placeholder">{GENRE_ICONS[index]}</div>
+              <h3>{title}</h3>
             </Link>
           ))}
         </div>
@@ -62,3 +56,4 @@ export function Home() {
     </div>
   );
 }
+

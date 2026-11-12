@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { emailPasswordLogin, githubLogin, googleLogin, register } from '../services/auth';
 import './Login.css';
 
 function Login() {
+  const { state } = useLocation();
   const { currentUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,7 +13,12 @@ function Login() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
 
-  if (currentUser) return <Navigate to="/" replace />;
+  if (currentUser) {
+    if (state?.returnTo === '/search') {
+      return <Navigate to={{ pathname: '/search', search: state.search }} replace />;
+    }
+    return <Navigate to={state?.returnTo === '/collections' ? '/collections' : '/'} replace />;
+  }
 
   async function authenticate(action) {
     setPending(true);

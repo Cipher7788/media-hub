@@ -19,11 +19,12 @@ A personal media collection web app for comics, anime, movies, and books. Search
 - **Frontend**: React.js with React Router
 - **Backend**: Firebase (Authentication, Firestore)
 - **APIs**: 
-  - TMDB (Movies & TV Shows)
+  - TMDB (Movies)
   - Jikan (Anime)
-  - Comic Vine (Comics & Manga)
+  - Comic Vine (Comics)
+  - Open Library (Books)
 - **Styling**: CSS3 with responsive design
-- **Deployment**: Firebase Hosting / GitHub Pages
+- **Deployment**: Firebase Hosting
 
 ## 🚀 Quick Start
 
@@ -62,6 +63,7 @@ REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 REACT_APP_FIREBASE_APP_ID=your_app_id
 
 REACT_APP_TMDB_API_KEY=your_tmdb_key
+REACT_APP_COMICVINE_API_KEY=your_comicvine_key
 ```
 
 4. **Start development server**
@@ -106,17 +108,14 @@ media-hub/
 ### Search for Media
 1. Click on a category or use the search bar
 2. Enter a query (movie title, anime name, etc.)
-3. Browse results and click to view details
+3. Browse results or choose a movie genre from the home page
 
 ### Save to Collections
-- **Add to Favorites**: Click the heart icon
-- **Add to Watchlist**: Click the clock icon
-- **Rate & Review**: Give a rating and write a review
+- Sign in and use the Favorites and Watchlist buttons on each result.
+- Open **Show reviews** on a result to rate it, write a review, or edit your own review.
 
 ### View Your Dashboard
-- Go to your dashboard to see all your collections
-- Track watching progress
-- Compare ratings with other users
+- Open **My collections** to view and remove saved favorites and watchlist items.
 
 ## 🔐 Firebase Setup
 
@@ -153,11 +152,6 @@ npm run build
 firebase deploy --only hosting,firestore:rules --project YOUR_PROJECT_ID
 ```
 
-### GitHub Pages
-```bash
-npm run deploy
-```
-
 ## 🎨 Customization
 
 - Modify colors in CSS files (default: purple gradient)
@@ -184,10 +178,6 @@ npm run deploy
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see LICENSE file for details.
-
 ## 🤝 Support
 
 Found a bug? Have a suggestion? 
@@ -206,4 +196,4 @@ Found a bug? Have a suggestion?
 
 Made with ❤️ by [Cipher7788](https://github.com/Cipher7788)
 
-**[Live Demo](#)** • **[Report Bug](https://github.com/Cipher7788/media-hub/issues)** • **[Request Feature](https://github.com/Cipher7788/media-hub/discussions)**
+**[Report Bug](https://github.com/Cipher7788/media-hub/issues)** • **[Request Feature](https://github.com/Cipher7788/media-hub/discussions)**
